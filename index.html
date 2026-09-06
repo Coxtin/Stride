@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic To-Do List</title>
+    <link rel="stylesheet" href="main.css">
+    <script type="text/javascript" src="tasks.json"></script>
+    <script type="text/javascript" src="app.js"></script>
+</head>
+<body>
+    
+   <div class="container">
+
+        <!-- <div class="task-count"></div> -->
+
+        <div class="task-container" id="task-list"></div>
+        <dialog id="modal" class="modal">
+            <form action="" method="POST">
+
+                <h2><p>Enter a new task</p></h2>
+
+                <label for="task-name">Task Name: </label>
+                <input type="text" name="task-name" id="task-name" placeholder="What do you have to do?" required><br>
+                
+                <label for="task-priority">Task Priority: </label>
+                <select name="task-priority" id="task-priority">
+                    <option value="High">High</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Low">Low</option>
+                </select> <br>
+
+                <label for="task-time" >Task Duration: </label><br>
+                <div class="duration-options">
+                    <button type="button" class="duration-btn" data-duration="15">15 min</button>
+                    <button type="button" class="duration-btn" data-duration="30">30 min</button>
+                    <button type="button" class="duration-btn" data-duration="60">1 h</button>
+                    <button type="button" class="duration-btn" data-duration="120">2 h</button>
+                    <button type="button" class="duration-btn custom-duration">Personalize</button>
+                </div>
+
+            </form>
+            <button id="closeModal">Close</button>
+        </dialog>
+
+        <button id="openModal">Open Modal</button>
+
+   </div>
+
+</body>
+</html>
