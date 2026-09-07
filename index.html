@@ -16,7 +16,7 @@
 
         <div class="task-container" id="task-list"></div>
         <dialog id="modal" class="modal">
-            <form action="" method="POST">
+            <form id="add-task-form">
 
                 <h2><p>Enter a new task</p></h2>
 
@@ -24,20 +24,23 @@
                 <input type="text" name="task-name" id="task-name" placeholder="What do you have to do?" required><br>
                 
                 <label for="task-priority">Task Priority: </label>
-                <select name="task-priority" id="task-priority">
-                    <option value="High">High</option>
-                    <option value="Medium" selected>Medium</option>
-                    <option value="Low">Low</option>
-                </select> <br>
+                <div name="task-priority" id="task-priority">
+                    <button type="button" class="selection-btn priority-btn" id="Low">Low</button>
+                    <button type="button" class="selection-btn priority-btn" id="Medium">Medium</button>
+                    <button type="button" class="selection-btn priority-btn" id="High">High</button>
+                    <button type="button" class="selection-btn priority-btn" id="Custom">Custom</button>
+                </div> <br>
 
-                <label for="task-time" >Task Duration: </label><br>
+                <label for="duration-options" >Task Duration: </label><br>
                 <div class="duration-options">
-                    <button type="button" class="duration-btn" data-duration="15">15 min</button>
-                    <button type="button" class="duration-btn" data-duration="30">30 min</button>
-                    <button type="button" class="duration-btn" data-duration="60">1 h</button>
-                    <button type="button" class="duration-btn" data-duration="120">2 h</button>
-                    <button type="button" class="duration-btn custom-duration">Personalize</button>
+                    <button type="button" class="selection-btn duration-btn" data-duration="15">15 min</button>
+                    <button type="button" class="selection-btn duration-btn" data-duration="30">30 min</button>
+                    <button type="button" class="selection-btn duration-btn" data-duration="60">1 h</button>
+                    <button type="button" class="selection-btn duration-btn" data-duration="120">2 h</button>
+                    <button type="button" class="selection-btn duration-btn custom-duration">Customize</button>
                 </div>
+
+                <input type="submit" value="Submit task" id="save-task">
 
             </form>
             <button id="closeModal">Close</button>

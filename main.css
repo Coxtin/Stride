@@ -44,15 +44,17 @@ body, html {
     text-decoration: underline;
 }
 
-.add-task-button{
+/* .add-task-button{
 
     
 
-}
+} */
 
 .modal {
     border-radius: 10%;
     padding: 30px;
+    height: 40%;
+    width: 30%;
 }
 
 .duration-options{
@@ -61,7 +63,7 @@ body, html {
     gap: 10px;
 }
 
-.duration-btn {
+.selection-btn {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -70,7 +72,12 @@ body, html {
     cursor: pointer
 }
 
-.duration-btn.selected{
+.selection-btn.selected{
     border-color: #000;
-    font:bold;
+    font-weight: bold;
+    background-color: #e0e0e0;
+}
+
+.selection-btn:active {
+    transform: scale(0.95);
 }

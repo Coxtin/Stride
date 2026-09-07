@@ -1,5 +1,6 @@
 const API_URL = "./tasks.json";
 let selectedDuration = null;
+let selectedPriority = null;
 
 async function loadTasksFromFile() {
 
@@ -20,6 +21,34 @@ async function loadTasksFromFile() {
 
     } catch (error){
         console.error("Nu am putut citi fisierul .json: ", error);
+    }
+
+}
+
+async function loadTasksFromLocalStorage() {
+
+    try {
+
+        const container = document.getElementById("task-list");
+        const currentTasks = JSON.parse(localStorage.getItem("tasks"));
+
+        if (currentTasks === null){
+            container.innerHTML = `
+              <div class="empty-list">
+
+                    <p>
+                        No task registered yet! Press the button to add one!
+                    </p>
+                   
+
+                </div>
+            `
+            return;
+        }
+        showTasks(currentTasks);
+
+    } catch (error) {
+        console.error("There was an error while finding for saved tasks: ", error);
     }
 
 }
@@ -45,7 +74,8 @@ function showTasks(tasks) {
         tasks.forEach(element => {
             generatedHTML += `
                 <div class="task-card" id="${element.id}">
-                        ${element.title}
+                        ${element.taskName} - ${element.priority} ${element.duration ? "- " + element.duration : ""}
+                        <button>Remove task</button>
                 </div>
             `
         });
@@ -78,11 +108,73 @@ function initializeDurationSelection() {
 
 }
 
+function initializePrioritySelection() {
+
+    const priorityBtns = document.querySelectorAll(".priority-btn");
+
+    priorityBtns.forEach(button => {
+
+        button.addEventListener("click", () => {
+            
+            priorityBtns.forEach(btn => {
+                btn.classList.remove("selected");
+            });
+
+            button.classList.add("selected");
+
+            selectedPriority = button.textContent;
+
+            console.log("Taskul are prioritatea: ", selectedPriority);
+        });
+    })
+
+}
+
+function saveTask() {
+
+    const taskNameInput = document.getElementById("task-name");
+    const taskName = taskNameInput.value.trim();
+    
+    if (taskName === ''){
+        alert("The new task has no name!");
+        return;
+    }
+
+    const newTask = {
+        id: "task-" + Date.now(),
+        taskName: taskName,
+        priority: selectedPriority,
+        duration: selectedDuration,
+        isComplete: false,
+        createdAt: new Date().toISOString(),
+        needSync: true
+    }
+
+    console.log("The new task: ", newTask);
+
+    const savedTasks = localStorage.getItem("tasks");
+    let tasksArray = [];
+
+
+    if (savedTasks !== null)
+        tasksArray = JSON.parse(savedTasks);
+
+    tasksArray.push(newTask);
+
+    localStorage.setItem("tasks", JSON.stringify(tasksArray));
+
+    taskNameInput.value = "";
+    selectedDuration = null;
+    selectedPriority = null;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     
-    loadTasksFromFile();
+    loadTasksFromLocalStorage();
 
     initializeDurationSelection();
+
+    initializePrioritySelection();
 
     const modal = document.getElementById("modal");
 
@@ -92,6 +184,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("closeModal").addEventListener("click", () => {
         modal.close();
+    });
+
+    document.getElementById("add-task-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        saveTask();
     });
 });
 
