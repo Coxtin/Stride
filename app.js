@@ -53,7 +53,7 @@ async function loadTasksFromLocalStorage() {
 
 }
 
-function showTasks(tasks) {
+async function showTasks(tasks) {
 
     const container = document.getElementById("task-list");
 
@@ -75,7 +75,7 @@ function showTasks(tasks) {
             generatedHTML += `
                 <div class="task-card" id="${element.id}">
                         ${element.taskName} - ${element.priority} ${element.duration ? "- " + element.duration : ""}
-                        <button>Remove task</button>
+                        <button class="delete-btn">Remove task</button>
                 </div>
             `
         });
@@ -130,7 +130,20 @@ function initializePrioritySelection() {
 
 }
 
-function saveTask() {
+async function removeTask(id){
+
+    const tasks = JSON.parse(localStorage.getItem("tasks"));
+
+    const taskListUpdated = tasks.filter((obj) => obj.id !== id);
+
+    localStorage.setItem("tasks", JSON.stringify(taskListUpdated));
+
+    showTasks(taskListUpdated);
+
+
+}
+
+async function saveTask() {
 
     const taskNameInput = document.getElementById("task-name");
     const taskName = taskNameInput.value.trim();
@@ -163,9 +176,17 @@ function saveTask() {
 
     localStorage.setItem("tasks", JSON.stringify(tasksArray));
 
+    showTasks(tasksArray);
+
     taskNameInput.value = "";
     selectedDuration = null;
     selectedPriority = null;
+
+    document.querySelectorAll(".selection-btn").forEach(selection => {
+        selection.classList.remove("selected");
+    })
+
+    document.getElementById("modal").close();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -177,6 +198,21 @@ document.addEventListener("DOMContentLoaded", () => {
     initializePrioritySelection();
 
     const modal = document.getElementById("modal");
+
+    const taskListContainer = document.getElementById("task-list");
+
+    taskListContainer.addEventListener("click", (event) => {
+
+        if (event.target.classList.contains("delete-btn")){
+
+            const selectedTask = event.target.closest(".task-card");
+            const taskId = selectedTask.id;
+
+            removeTask(taskId);
+
+        }
+
+    });
 
     document.getElementById("openModal").addEventListener("click", () => {
         modal.showModal();
