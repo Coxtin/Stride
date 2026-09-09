@@ -241,3 +241,13 @@ input[type="text"]:focus {
     gap: 12px;
     margin-top: 32px;
 }
+
+.custom-input {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0px); }
+}

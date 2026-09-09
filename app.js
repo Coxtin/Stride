@@ -106,6 +106,20 @@ function showTasks(tasks) {
 function initializeDurationSelection() {
 
     const durationBtns = document.querySelectorAll(".duration-btn");
+    const customInput = document.getElementById("custom-time");
+
+    customInput.addEventListener("change", (event) => {
+
+        const time = Number(event.target.value);
+        if (event.target.value !== "" && time <= 0){
+            alert("You can not set the duration of a task less than 1!");
+            event.target.value = "";
+            selectedDuration = 0;
+            return;
+        }
+        selectedDuration = time;
+        console.log("Custom time updated to: ", selectedDuration);
+    }); 
 
     durationBtns.forEach(button => {
 
@@ -117,10 +131,17 @@ function initializeDurationSelection() {
 
             button.classList.add("selected");
 
-            if (!button.classList.contains("custom-duration"))
+            if (!button.classList.contains("custom-duration")){
+                customInput.style.display = "none";
+                customInput.value = "";
                 selectedDuration = Number(button.dataset.duration);
+            } else {
+                customInput.style.display = "block";
+                customInput.focus();
+                selectedDuration = Number(customInput.value) || 0;
+            }
 
-            console.log("Taskul dureaza: ", selectedDuration, " timp");
+            console.log("The task takes : ", selectedDuration, " time to finish");
 
         });
     })
