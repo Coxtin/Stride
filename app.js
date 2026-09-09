@@ -151,6 +151,23 @@ function initializeDurationSelection() {
 function initializePrioritySelection() {
 
     const priorityBtns = document.querySelectorAll(".priority-btn");
+    const customInput = document.getElementById("custom-priority");
+
+    customInput.addEventListener("change", (event) => {
+
+        const priority = event.target.value;
+
+        if (priority === ""){
+            alert("Cannot set an empty priority!");
+            event.target.value = "";
+            selectedPriority = "";
+            return;
+        }
+
+        selectedPriority = priority;
+        console.log("The priority of the task is :", selectedPriority);
+
+    });
 
     priorityBtns.forEach(button => {
 
@@ -162,15 +179,23 @@ function initializePrioritySelection() {
 
             button.classList.add("selected");
 
-            selectedPriority = button.textContent;
+            if (!button.classList.contains("custom-priority")){
+                customInput.style.display = "none";
+                customInput.value = "";
+                selectedPriority = button.textContent;
+            } else {
+                customInput.style.display = "block";
+                customInput.focus();
+                selectedPriority = customInput.value || "";
+            }
 
-            console.log("Taskul are prioritatea: ", selectedPriority);
+            console.log("The task is : ", selectedPriority, " important");
         });
     })
 
 }
 
-async function removeTask(id){
+function removeTask(id){
 
     const tasks = JSON.parse(localStorage.getItem("tasks"));
 
