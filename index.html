@@ -11,43 +11,51 @@
 <body>
     
    <div class="container">
-
-        <!-- <div class="task-count"></div> -->
+        <div class="app-header">
+            <h1 id="greeting"></h1>
+            <button id="openModal" class="primary-btn">+ Add Task</button>
+        </div>
 
         <div class="task-container" id="task-list"></div>
+
         <dialog id="modal" class="modal">
-            <form id="add-task-form">
+            <div class="modal-content">
+                <form id="add-task-form">
+                    <h2>Enter a new task</h2>
 
-                <h2><p>Enter a new task</p></h2>
+                    <div class="form-group">
+                        <label for="task-name">Task Name:</label>
+                        <input type="text" name="task-name" id="task-name" placeholder="What do you have to do?" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Task Priority:</label>
+                        <div class="priority-options" id="task-priority">
+                            <button type="button" class="selection-btn priority-btn" id="Low">Low</button>
+                            <button type="button" class="selection-btn priority-btn" id="Medium">Medium</button>
+                            <button type="button" class="selection-btn priority-btn" id="High">High</button>
+                            <button type="button" class="selection-btn priority-btn" id="Custom">Custom</button>
+                        </div>
+                    </div>
 
-                <label for="task-name">Task Name: </label>
-                <input type="text" name="task-name" id="task-name" placeholder="What do you have to do?" required><br>
-                
-                <label for="task-priority">Task Priority: </label>
-                <div name="task-priority" id="task-priority">
-                    <button type="button" class="selection-btn priority-btn" id="Low">Low</button>
-                    <button type="button" class="selection-btn priority-btn" id="Medium">Medium</button>
-                    <button type="button" class="selection-btn priority-btn" id="High">High</button>
-                    <button type="button" class="selection-btn priority-btn" id="Custom">Custom</button>
-                </div> <br>
+                    <div class="form-group">
+                        <label>Task Duration:</label>
+                        <div class="duration-options">
+                            <button type="button" class="selection-btn duration-btn" data-duration="15">15 min</button>
+                            <button type="button" class="selection-btn duration-btn" data-duration="30">30 min</button>
+                            <button type="button" class="selection-btn duration-btn" data-duration="60">1 h</button>
+                            <button type="button" class="selection-btn duration-btn" data-duration="120">2 h</button>
+                            <button type="button" class="selection-btn duration-btn custom-duration">Customize</button>
+                        </div>
+                    </div>
 
-                <label for="duration-options" >Task Duration: </label><br>
-                <div class="duration-options">
-                    <button type="button" class="selection-btn duration-btn" data-duration="15">15 min</button>
-                    <button type="button" class="selection-btn duration-btn" data-duration="30">30 min</button>
-                    <button type="button" class="selection-btn duration-btn" data-duration="60">1 h</button>
-                    <button type="button" class="selection-btn duration-btn" data-duration="120">2 h</button>
-                    <button type="button" class="selection-btn duration-btn custom-duration">Customize</button>
-                </div>
-
-                <input type="submit" value="Submit task" id="save-task">
-
-            </form>
-            <button id="closeModal">Close</button>
+                    <div class="modal-actions">
+                        <button type="button" id="closeModal" class="secondary-btn">Cancel</button>
+                        <input type="submit" value="Save Task" id="save-task" class="primary-btn">
+                    </div>
+                </form>
+            </div>
         </dialog>
-
-        <button id="openModal">Open Modal</button>
-
    </div>
 
 </body>

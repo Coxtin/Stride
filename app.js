@@ -2,6 +2,25 @@ const API_URL = "./tasks.json";
 let selectedDuration = null;
 let selectedPriority = null;
 
+function countCurrentTasks () {
+
+    const container = document.getElementById("greeting");
+    const tasksArray = JSON.parse(localStorage.getItem("tasks"));
+
+    if (!tasksArray)
+        return 0;
+
+    let count = 0;
+
+    tasksArray.forEach((element) => {
+        if (!element.isComplete)
+            count++;
+    });
+
+    container.textContent = "My Tasks: " + String(count);
+
+}
+
 async function loadTasksFromFile() {
 
     try {
@@ -25,7 +44,7 @@ async function loadTasksFromFile() {
 
 }
 
-async function loadTasksFromLocalStorage() {
+function loadTasksFromLocalStorage() {
 
     try {
 
@@ -35,12 +54,7 @@ async function loadTasksFromLocalStorage() {
         if (currentTasks === null){
             container.innerHTML = `
               <div class="empty-list">
-
-                    <p>
-                        No task registered yet! Press the button to add one!
-                    </p>
-                   
-
+                    <p>No tasks registered yet! Click the button above to add one!</p>
                 </div>
             `
             return;
@@ -53,29 +67,34 @@ async function loadTasksFromLocalStorage() {
 
 }
 
-async function showTasks(tasks) {
+function showTasks(tasks) {
 
     const container = document.getElementById("task-list");
 
     if (tasks.length === 0){
         container.innerHTML = `
             <div class="empty-list">
-
-                <p>
-                    No task registered yet! Press the button to add one!
-                </p>
-                <button class="add-task-button">Add a task</button>
-
+                <p>No tasks registered yet! Click the button above to add one!</p>
             </div>
         `
     }
     else {
         let generatedHTML = '';
         tasks.forEach(element => {
+            const priorityClass = element.priority ? element.priority.toLowerCase() : 'none';
+            const priorityBadge = element.priority ? `<span class="badge priority-${priorityClass}">${element.priority}</span>` : `<span class="badge priority-${priorityClass}">No Priority</span>`;
+            const durationBadge = element.duration ? `<span class="badge duration">${element.duration} min</span>` : `<span class="badge duration">No duration</span>`;
+            
             generatedHTML += `
-                <div class="task-card" id="${element.id}">
-                        ${element.taskName} - ${element.priority} ${element.duration ? "- " + element.duration : ""}
-                        <button class="delete-btn">Remove task</button>
+                <div class="task-card ${element.isComplete ? "completed" : "" }" id="${element.id}">
+                    <div class="task-info">
+                        <h3 class="task-title">${element.taskName}</h3>
+                        <div class="task-meta">
+                            ${priorityBadge}
+                            ${durationBadge}
+                        </div>
+                    </div>
+                    <button class="delete-btn">Remove</button>
                 </div>
             `
         });
@@ -134,16 +153,21 @@ async function removeTask(id){
 
     const tasks = JSON.parse(localStorage.getItem("tasks"));
 
+    if (!tasks){
+        console.log("There is no task with such id to delete!");
+        return;
+    }
+
     const taskListUpdated = tasks.filter((obj) => obj.id !== id);
 
     localStorage.setItem("tasks", JSON.stringify(taskListUpdated));
 
+    countCurrentTasks();
     showTasks(taskListUpdated);
-
 
 }
 
-async function saveTask() {
+function saveTask() {
 
     const taskNameInput = document.getElementById("task-name");
     const taskName = taskNameInput.value.trim();
@@ -176,6 +200,7 @@ async function saveTask() {
 
     localStorage.setItem("tasks", JSON.stringify(tasksArray));
 
+    countCurrentTasks();
     showTasks(tasksArray);
 
     taskNameInput.value = "";
@@ -189,8 +214,30 @@ async function saveTask() {
     document.getElementById("modal").close();
 }
 
+function checkTask(id){
+
+    const tasksArray = JSON.parse(localStorage.getItem("tasks"));
+
+    if (!tasksArray)
+        return;
+
+    const tasksArrayUpdated = tasksArray.map((element) => {
+        if (element.id === id){
+            return {...element, isComplete: !element.isComplete}
+        }
+        return element;
+    });
+
+    localStorage.setItem("tasks", JSON.stringify(tasksArrayUpdated));
+    //console.log("The task with the following id: ", id, " was checked/unchecked")
+    countCurrentTasks();
+    showTasks(tasksArrayUpdated);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     
+    countCurrentTasks();
+
     loadTasksFromLocalStorage();
 
     initializeDurationSelection();
@@ -203,15 +250,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     taskListContainer.addEventListener("click", (event) => {
 
-        if (event.target.classList.contains("delete-btn")){
+        console.log("The card was pressed!");
+        const selectedTask = event.target.closest(".task-card");
 
-            const selectedTask = event.target.closest(".task-card");
-            const taskId = selectedTask.id;
-
-            removeTask(taskId);
-
+        if (!selectedTask){
+            console.log("No task!");
+            return;
         }
 
+        const taskId = selectedTask.id;
+
+        console.log("Tasks's id: ", taskId);
+
+        const deleteButton = event.target.closest(".delete-btn")
+        
+        if (deleteButton)
+            removeTask(taskId);
+        else
+            checkTask(taskId);
     });
 
     document.getElementById("openModal").addEventListener("click", () => {
@@ -227,8 +283,3 @@ document.addEventListener("DOMContentLoaded", () => {
         saveTask();
     });
 });
-
-
-
-
-
