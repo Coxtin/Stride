@@ -107,7 +107,7 @@ async function loadTasksFromGist() {
 
 }
 
-async function cloudSync(tasksArray) {
+async function  cloudSync(tasksArray) {
 
     const token = localStorage.getItem("github_token");
     const gistId = localStorage.getItem("gist_id");
@@ -121,6 +121,7 @@ async function cloudSync(tasksArray) {
 
         const response = await fetch (`https://api.github.com/gists/${gistId}`, {
             method: "PATCH",
+            keepalive: true,
             headers: {
                 "Authorization": `Bearer ${token}`,
                 "Accept": "application/vnd.github.v3+json",
@@ -420,6 +421,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         event.preventDefault();
         saveTask();
     });
+});
+
+document.addEventListener("visibilitychange", () => {
+
+    if (document.visibilityState === 'hidden'){
+
+        if (timeForSync !== null){
+
+            clearTimeout(timeForSync);
+            timeForSync = null;
+
+            console.log("Tab closed! Forcing cloud saving...");
+
+            const savedTasks = JSON.parse(localStorage.getItem("tasks"));
+
+            if (savedTasks)
+                cloudSync(savedTasks);
+        }
+    }
 });
 
 window.addEventListener("online", () => {
