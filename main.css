@@ -251,3 +251,26 @@ input[type="text"]:focus {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0px); }
 }
+.sync-status {
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    color: black;
+    opacity: 1;
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Clasa care ascunde indicatorul cand nu e nevoie de el */
+.sync-status.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Culorile pentru fiecare stare */
+.sync-status.saving { background-color: #f39c12; } /* Portocaliu */
+.sync-status.success { background-color: #27ae60; } /* Verde */
+.sync-status.offline { background-color: #7f8c8d; } /* Gri */
+.sync-status.error { background-color: #e74c3c; } /* Rosu */

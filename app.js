@@ -3,9 +3,10 @@ let selectedDuration = null;
 let selectedPriority = null;
 let timeForSync = null;
 
-function countCurrentTasks () {
+function showHeader () {
 
     const container = document.getElementById("greeting");
+    const syncStatus = document.getElementById("sync-status");
     const tasksArray = JSON.parse(localStorage.getItem("tasks"));
 
     if (!tasksArray)
@@ -78,6 +79,11 @@ async function loadTasksFromGist() {
         return;
     }
 
+    if (!navigator.onLine){
+        loadTasksFromLocalStorage();
+        return;
+    }
+
     try {
 
         console.log("Trying to update tasks from gist...");
@@ -107,7 +113,7 @@ async function loadTasksFromGist() {
 
 }
 
-async function  cloudSync(tasksArray) {
+async function cloudSync(tasksArray) {
 
     const token = localStorage.getItem("github_token");
     const gistId = localStorage.getItem("gist_id");
@@ -116,6 +122,13 @@ async function  cloudSync(tasksArray) {
         console.log("There is no github token or gist id");
         return;
     }
+
+    if (!navigator.onLine){
+        showSyncStatus("Offline! Local Save Only!", "offline");
+        return;
+    }
+
+    showSyncStatus("Saving to Cloud...", "saving");
 
     try {
 
@@ -140,10 +153,13 @@ async function  cloudSync(tasksArray) {
             throw new Error(`The sync could not be complete, because: ${response.status}`);
         }
 
+        showSyncStatus("All changes saved!", "success");
+
         console.log("The sync has been successfully completed!");
 
     } catch (error){
-        console.error(`There was an error updating online tasks: ${error}`)
+        console.error(`There was an error updating online tasks: ${error}`);
+        showSyncStatus("Sync failed! Will retry later.", "error");
     }
 
 }
@@ -215,27 +231,33 @@ function initializeDurationSelection() {
 
         button.addEventListener("click", () => {
             
-            durationBtns.forEach(btn => {
-                btn.classList.remove("selected");
-            });
-
-            button.classList.add("selected");
-
-            if (!button.classList.contains("custom-duration")){
+            if (button.classList.contains("selected")){
+                button.classList.remove("selected");
+                selectedDuration = null;
                 customInput.style.display = "none";
                 customInput.value = "";
-                selectedDuration = Number(button.dataset.duration);
             } else {
-                customInput.style.display = "block";
-                customInput.focus();
-                selectedDuration = Number(customInput.value) || 0;
+
+                durationBtns.forEach(btn => {
+                    btn.classList.remove("selected");
+                });
+
+                button.classList.add("selected");
+
+                if (!button.classList.contains("custom-duration")){
+                    customInput.style.display = "none";
+                    customInput.value = "";
+                    selectedDuration = Number(button.dataset.duration);
+                } else {
+                    customInput.style.display = "block";
+                    customInput.focus();
+                    selectedDuration = Number(customInput.value) || 0;
+                }
+
+                console.log("The task takes : ", selectedDuration, " time to finish");
             }
-
-            console.log("The task takes : ", selectedDuration, " time to finish");
-
         });
-    })
-
+    });
 }
 
 function initializePrioritySelection() {
@@ -263,23 +285,31 @@ function initializePrioritySelection() {
 
         button.addEventListener("click", () => {
             
-            priorityBtns.forEach(btn => {
-                btn.classList.remove("selected");
-            });
-
-            button.classList.add("selected");
-
-            if (!button.classList.contains("custom-priority")){
+            if (button.classList.contains("selected")){
+                button.classList.remove("selected");
+                selectedPriority = null;
                 customInput.style.display = "none";
                 customInput.value = "";
-                selectedPriority = button.textContent;
             } else {
-                customInput.style.display = "block";
-                customInput.focus();
-                selectedPriority = customInput.value || "";
-            }
 
-            console.log("The task is : ", selectedPriority, " important");
+                priorityBtns.forEach(btn => {
+                    btn.classList.remove("selected");
+                });
+
+                button.classList.add("selected");
+
+                if (!button.classList.contains("custom-priority")){
+                    customInput.style.display = "none";
+                    customInput.value = "";
+                    selectedPriority = button.textContent;
+                } else {
+                    customInput.style.display = "block";
+                    customInput.focus();
+                    selectedPriority = customInput.value || "";
+                }
+
+                console.log("The task is : ", selectedPriority, " important");
+            }
         });
     })
 
@@ -298,7 +328,7 @@ function removeTask(id){
 
     localStorage.setItem("tasks", JSON.stringify(taskListUpdated));
 
-    countCurrentTasks();
+    showHeader();
     showTasks(taskListUpdated);
     scheduleCloudSync(taskListUpdated);
 
@@ -337,7 +367,7 @@ function saveTask() {
 
     localStorage.setItem("tasks", JSON.stringify(tasksArray));
 
-    countCurrentTasks();
+    showHeader();
     showTasks(tasksArray);
     scheduleCloudSync(tasksArray);
 
@@ -368,16 +398,33 @@ function checkTask(id){
 
     localStorage.setItem("tasks", JSON.stringify(tasksArrayUpdated));
     //console.log("The task with the following id: ", id, " was checked/unchecked")
-    countCurrentTasks();
+    showHeader();
     showTasks(tasksArrayUpdated);
     scheduleCloudSync(tasksArrayUpdated);
+}
+
+function showSyncStatus (message, status){
+
+    const statusMessage = document.getElementById("sync-status");
+
+    if (!statusMessage)
+        return;
+
+    statusMessage.className = "sync-status";
+    statusMessage.classList.add(status);
+    statusMessage.textContent = message;
+
+    if (status !== 'offline')
+        setTimeout(() => {
+            statusMessage.classList.add('hidden');
+    }, 3000);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
 
     await loadTasksFromGist();
 
-    countCurrentTasks();
+    showHeader();
 
     initializeDurationSelection();
 
@@ -444,7 +491,6 @@ document.addEventListener("visibilitychange", () => {
 
 window.addEventListener("online", () => {
     console.log("Back online! Syncing ...");
-
     const savedTasks = JSON.parse(localStorage.getItem("tasks"));
 
     if (savedTasks){
@@ -453,5 +499,6 @@ window.addEventListener("online", () => {
 });
 
 window.addEventListener("offline", () => {
+    showSyncStatus("Offline! Local Save Only.", "offline");
     console.log("There is no internet! Only local save!");
 })
