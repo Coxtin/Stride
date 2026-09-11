@@ -1,6 +1,7 @@
 const API_URL = "./tasks.json";
 let selectedDuration = null;
 let selectedPriority = null;
+let timeForSync = null;
 
 function countCurrentTasks () {
 
@@ -64,7 +65,95 @@ function loadTasksFromLocalStorage() {
     } catch (error) {
         console.error("There was an error while finding for saved tasks: ", error);
     }
+}
 
+async function loadTasksFromGist() {
+
+    const token = localStorage.getItem("github_token");
+    const gistId = localStorage.getItem("gist_id");
+
+    if (!token || !gistId){
+        console.log("There is no github token or gist!");
+        loadTasksFromLocalStorage();
+        return;
+    }
+
+    try {
+
+        console.log("Trying to update tasks from gist...");
+        const response = await fetch (`https://api.github.com/gists/${gistId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': `application/vnd.github.v3+json`
+            },
+        });
+
+        if (!response.ok){
+            throw new Error(`Error while trying to fetch online saved tasks: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const content = data.files['tasks.json'].content;
+        const tasksContent = JSON.parse(content || "[]");
+
+        localStorage.setItem("tasks", JSON.stringify(tasksContent));
+        showTasks(tasksContent);
+        console.log("Tasks from gist have been uploaded!");
+    } catch (error){
+        console.error("There was an error while fetching the online tasks:", error);
+        loadTasksFromLocalStorage();
+    }
+
+}
+
+async function cloudSync(tasksArray) {
+
+    const token = localStorage.getItem("github_token");
+    const gistId = localStorage.getItem("gist_id");
+
+    if (!token || !gistId){
+        console.log("There is no github token or gist id");
+        return;
+    }
+
+    try {
+
+        const response = await fetch (`https://api.github.com/gists/${gistId}`, {
+            method: "PATCH",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/vnd.github.v3+json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                files: {
+                    'tasks.json': {
+                        content: JSON.stringify(tasksArray)
+                    }
+                }
+            })
+        });
+
+        if (!response.ok){
+            throw new Error(`The sync could not be complete, because: ${response.status}`);
+        }
+
+        console.log("The sync has been successfully completed!");
+
+    } catch (error){
+        console.error(`There was an error updating online tasks: ${error}`)
+    }
+
+}
+
+function scheduleCloudSync(tasksArray) {
+    if (timeForSync !== null)
+        clearTimeout(timeForSync);
+
+    timeForSync = setTimeout(() => {
+        cloudSync(tasksArray);
+    }, 2000);
 }
 
 function showTasks(tasks) {
@@ -210,6 +299,7 @@ function removeTask(id){
 
     countCurrentTasks();
     showTasks(taskListUpdated);
+    scheduleCloudSync(taskListUpdated);
 
 }
 
@@ -248,6 +338,7 @@ function saveTask() {
 
     countCurrentTasks();
     showTasks(tasksArray);
+    scheduleCloudSync(tasksArray);
 
     taskNameInput.value = "";
     selectedDuration = null;
@@ -278,13 +369,14 @@ function checkTask(id){
     //console.log("The task with the following id: ", id, " was checked/unchecked")
     countCurrentTasks();
     showTasks(tasksArrayUpdated);
+    scheduleCloudSync(tasksArrayUpdated);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    
-    countCurrentTasks();
+document.addEventListener("DOMContentLoaded", async () => {
 
-    loadTasksFromLocalStorage();
+    await loadTasksFromGist();
+
+    countCurrentTasks();
 
     initializeDurationSelection();
 
@@ -329,3 +421,17 @@ document.addEventListener("DOMContentLoaded", () => {
         saveTask();
     });
 });
+
+window.addEventListener("online", () => {
+    console.log("Back online! Syncing ...");
+
+    const savedTasks = JSON.parse(localStorage.getItem("tasks"));
+
+    if (savedTasks){
+        cloudSync(savedTasks);
+    }
+});
+
+window.addEventListener("offline", () => {
+    console.log("There is no internet! Only local save!");
+})
