@@ -2,6 +2,8 @@ const API_URL = "./tasks.json";
 let selectedDuration = null;
 let selectedPriority = null;
 let timeForSync = null;
+let currentFocusInterval = null;
+let currentFocusTaskId = null;
 
 function showHeader () {
 
@@ -200,7 +202,13 @@ function showTasks(tasks) {
                             ${durationBadge}
                         </div>
                     </div>
-                    <button class="delete-btn">Remove</button>
+                    <div>
+                        ${element.duration && !element.isComplete
+                            ? `<button class="start-timer-btn" id="start-timer-btn">Start ${element.duration} minute timer</button>`
+                            : ``
+                        }
+                        <button class="delete-btn">Remove</button>
+                    </div>
                 </div>
             `
         });
@@ -237,7 +245,6 @@ function initializeDurationSelection() {
                 customInput.style.display = "none";
                 customInput.value = "";
             } else {
-
                 durationBtns.forEach(btn => {
                     btn.classList.remove("selected");
                 });
@@ -350,15 +357,13 @@ function saveTask() {
         priority: selectedPriority,
         duration: selectedDuration,
         isComplete: false,
-        createdAt: new Date().toISOString(),
-        needSync: true
+        createdAt: new Date().toISOString()
     }
 
     console.log("The new task: ", newTask);
 
     const savedTasks = localStorage.getItem("tasks");
     let tasksArray = [];
-
 
     if (savedTasks !== null)
         tasksArray = JSON.parse(savedTasks);
@@ -372,6 +377,15 @@ function saveTask() {
     scheduleCloudSync(tasksArray);
 
     taskNameInput.value = "";
+
+    const customTime = document.getElementById("custom-time");
+    customTime.value = "";
+    customTime.style.display = "none";
+
+    const customPriority = document.getElementById("custom-priority");
+    customPriority.value = "";
+    customPriority.style.display = "none";
+
     selectedDuration = null;
     selectedPriority = null;
 
@@ -420,6 +434,77 @@ function showSyncStatus (message, status){
     }, 3000);
 }
 
+function startFocusMode(taskId) {
+
+    console.log("Start focusing...");
+
+    const tasksArray = JSON.parse(localStorage.getItem("tasks"));
+    const task = tasksArray.find(task => task.id === taskId);
+
+    if (!task){
+        alert("There is no task!");
+        return;
+    }
+
+    if (!task.duration || task.duration <= 0){
+        return;
+    }
+
+    currentFocusTaskId = taskId;
+
+    const focusModal = document.getElementById("focus-modal");
+    const focusTitle = document.getElementById("working-task-name");
+    const focusTime = document.getElementById("working-task-time");
+
+    focusTitle.textContent = task.taskName;
+    focusModal.showModal();
+
+    let remainingTime = Number(task.duration) * 60;
+
+    updateFocusTimer(focusTime, remainingTime);
+
+    if (currentFocusInterval) clearInterval(currentFocusInterval);
+
+    currentFocusInterval = setInterval(() => {
+        remainingTime--;
+
+        updateFocusTimer(focusTime, remainingTime);
+
+        if (remainingTime <= 0){
+
+            clearInterval(currentFocusInterval);
+            focusTime.value = "00:00";
+            playSound();
+            alert("The time expired! Have you finished?");
+        }
+    }, 1000);
+
+}
+
+function updateFocusTimer(timerElement, remainingTime){
+
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = (remainingTime % 60);
+
+    const formattedMins = String(minutes).padStart(2, '0');
+    const formattedSec = String(seconds).padStart(2, '0');
+
+    timerElement.textContent = formattedMins + " : " + formattedSec;
+
+}
+
+function playSound(){
+
+    const audioCtx = new window.AudioContext;
+    const oscillator = audioCtx.createOscillator();
+    oscillator.type = "square";
+    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+    oscillator.connect(audioCtx.destination);
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.5);
+
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
 
     await loadTasksFromGist();
@@ -436,6 +521,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initializeDurationSelection();
     initializePrioritySelection();
     const modal = document.getElementById("modal");
+    const focusModal = document.getElementById("focus-modal");
     const taskListContainer = document.getElementById("task-list");
     
     taskListContainer.addEventListener("click", (event) => {
@@ -448,9 +534,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         const taskId = selectedTask.id;
         console.log("Tasks's id: ", taskId);
         const deleteButton = event.target.closest(".delete-btn");
+        const openFocusModal = event.target.closest(".start-timer-btn");
 
         if (deleteButton)
             removeTask(taskId);
+        else if (openFocusModal)
+           startFocusMode(taskId);
         else
             checkTask(taskId);
     });
@@ -459,12 +548,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     document.getElementById("closeModal").addEventListener("click", () => {
+
+        const customTime = document.getElementById("custom-time");
+        customTime.value = "";
+        customTime.style.display = "none";
+
+        const customPriority = document.getElementById("custom-priority");
+        customPriority.value = "";
+        customPriority.style.display = "none";
+
         modal.close();
     });
 
     document.getElementById("add-task-form").addEventListener("submit", (event) => {
         event.preventDefault();
         saveTask();
+    });
+
+    document.getElementById("stop-timer-btn").addEventListener("click", () => {
+        clearInterval(currentFocusInterval);
+        focusModal.close();
+    });
+
+    document.getElementById("finish-btn").addEventListener("click", () => {
+        clearInterval(currentFocusInterval);
+        focusModal.close();
+        checkTask(currentFocusTaskId);
     });
 });
 

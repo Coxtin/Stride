@@ -8,6 +8,7 @@
     --text-main: #1F2937;
     --text-muted: #6B7280;
     --border-color: #E5E7EB;
+    --info: green;
 }
 
 body, html {
@@ -76,7 +77,7 @@ body, html {
 
 .task-card {
     display: flex;
-    justify-content: space-between;
+    justify-content:space-between;
     align-items: center;
     padding: 20px 24px;
     background-color: var(--card-bg);
@@ -88,8 +89,14 @@ body, html {
 }
 
 .task-card.completed{
-    opacity: 0.6;
     background-color: #e0e0e0;
+}
+
+.task-card.completed .task-info{
+    opacity: 0.6;
+}
+
+.task-card.completed .task-title{
     text-decoration: line-through;
 }
 
@@ -102,7 +109,6 @@ body, html {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
     border-color: #D1D5DB;
 }
-
 
 .task-info {
     display: flex;
@@ -176,6 +182,22 @@ body, html {
 
 .delete-btn:hover {
     background-color: var(--danger);
+    color: white;
+}
+
+.start-timer-btn {
+    background-color: transparent;
+    color: var(--info);
+    border: 1px solid var(--info);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor:pointer;
+    transition: all 0.2s;
+}
+
+.start-timer-btn:hover{
+    background-color: var(--info);
     color: white;
 }
 
@@ -301,3 +323,80 @@ input[type="text"]:focus {
 .sync-status.success { background-color: #27ae60; } /* Verde */
 .sync-status.offline { background-color: #7f8c8d; } /* Gri */
 .sync-status.error { background-color: #e74c3c; } /* Rosu */
+
+/* Focus Modal Styling */
+.focus-modal {
+    border: none;
+    border-radius: 16px;
+    padding: 0;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    background: var(--card-bg);
+}
+
+.focus-modal::backdrop {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+}
+
+.focus-container {
+    padding: 40px 32px;
+    text-align: center;
+}
+
+.focus-mode-info {
+    margin-bottom: 32px;
+}
+
+.working-task-name {
+    margin: 0 0 16px 0;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+.working-task-time {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.focus-mode-controls {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.stop-timer-btn, .finish-btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.stop-timer-btn {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+}
+
+.stop-timer-btn:hover {
+    background: #F9FAFB;
+    border-color: #D1D5DB;
+}
+
+.finish-btn {
+    background: var(--primary);
+    border: 1px solid var(--primary);
+    color: white;
+}
+
+.finish-btn:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
