@@ -424,38 +424,36 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     await loadTasksFromGist();
 
+    const loadingOverlay = document.getElementById("spinner-fullscreen");
+
+    loadingOverlay.style.opacity = "0";
+    loadingOverlay.style.transition = "opacity 0.5s ease";
+    setTimeout(() => {
+        loadingOverlay.style.display = "none"
+    }, 500);
+
     showHeader();
-
     initializeDurationSelection();
-
     initializePrioritySelection();
-
     const modal = document.getElementById("modal");
-
     const taskListContainer = document.getElementById("task-list");
-
+    
     taskListContainer.addEventListener("click", (event) => {
-
         console.log("The card was pressed!");
         const selectedTask = event.target.closest(".task-card");
-
         if (!selectedTask){
             console.log("No task!");
             return;
         }
-
         const taskId = selectedTask.id;
-
         console.log("Tasks's id: ", taskId);
+        const deleteButton = event.target.closest(".delete-btn");
 
-        const deleteButton = event.target.closest(".delete-btn")
-        
         if (deleteButton)
             removeTask(taskId);
         else
             checkTask(taskId);
     });
-
     document.getElementById("openModal").addEventListener("click", () => {
         modal.showModal();
     });
