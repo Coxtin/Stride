@@ -11,6 +11,15 @@ function showHeader () {
     const syncStatus = document.getElementById("sync-status");
     const tasksArray = JSON.parse(localStorage.getItem("tasks"));
 
+    const token = localStorage.getItem("github_token");
+    const id = localStorage.getItem("gist_id");
+
+    if (!token || !id){
+        showSyncStatus("The cloud saving is off due to missing credentials", "offline");
+    } else if (syncStatus.classList.contains("offline")){
+        syncStatus.className = "sync-status hidden";
+    }
+
     if (!tasksArray)
         return 0;
 
@@ -520,9 +529,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     showHeader();
     initializeDurationSelection();
     initializePrioritySelection();
+
     const modal = document.getElementById("modal");
     const focusModal = document.getElementById("focus-modal");
     const taskListContainer = document.getElementById("task-list");
+    const settingsModal = document.getElementById("settings-modal");
+    const githubPAT = document.getElementById("github-PAT");
+    const githubGistId = document.getElementById("github-gist-id");
     
     taskListContainer.addEventListener("click", (event) => {
         console.log("The card was pressed!");
@@ -565,6 +578,47 @@ document.addEventListener("DOMContentLoaded", async () => {
         saveTask();
     });
 
+    document.getElementById("open-settings-modal").addEventListener("click", () => {
+
+        githubPAT.value = localStorage.getItem("github_token") || "";
+        githubGistId.value = localStorage.getItem("gist_id") || "";
+        settingsModal.showModal();
+
+    });
+
+    document.getElementById("close-settings-modal-btn").addEventListener("click", () => {
+        settingsModal.close();
+    });
+
+    document.getElementById("submit-settings-btn").addEventListener("submit", async (event) => {
+
+        event.preventDefault();
+
+        const newToken = githubPAT.value.trim();
+        const newGist = githubGistId.value.trim();
+
+        if (newToken && newGist){
+            localStorage.setItem("github_token", newToken);
+            localStorage.setItem("gist_id", newGist);
+
+            console.log("New cloud settings established! Syncing data...");
+            //alert("New cloud settings established! Syncing data...");
+            
+            settingsModal.close();
+
+            showSyncStatus("Downloading content from cloud...", "saving");
+            
+            await loadTasksFromGist();
+
+            showHeader();
+
+            showSyncStatus("Cloud Sync Activated", "succes");
+        } else {
+            alert("You have to enter both values in the form!")
+        }
+
+    });
+    
     document.getElementById("stop-timer-btn").addEventListener("click", () => {
         clearInterval(currentFocusInterval);
         focusModal.close();
