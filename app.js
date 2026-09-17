@@ -1,6 +1,7 @@
 const API_URL = "./tasks.json";
 let selectedDuration = null;
 let selectedPriority = null;
+let selectedPriorityColor = null;
 let timeForSync = null;
 let currentFocusInterval = null;
 let currentFocusTaskId = null;
@@ -199,7 +200,11 @@ function showTasks(tasks) {
         let generatedHTML = '';
         tasks.forEach(element => {
             const priorityClass = element.priority ? element.priority.toLowerCase() : 'none';
-            const priorityBadge = element.priority ? `<span class="badge priority-${priorityClass}">${element.priority}</span>` : `<span class="badge priority-${priorityClass}">No Priority</span>`;
+            const priorityBadge = element.priority
+            ? element.priorityColor
+                ? `<span class="badge priority" style="background-color: ${element.priorityColor}; color: contrast-color(${element.priorityColor})">${element.priority}</span>`
+                : `<span class="badge priority-${priorityClass}">${element.priority}</span>`
+            : `<span class="badge priority-${priorityClass}">No Priority</span>`;
             const durationBadge = element.duration ? `<span class="badge duration">${element.duration} min</span>` : `<span class="badge duration">No duration</span>`;
             
             generatedHTML += `
@@ -280,6 +285,7 @@ function initializePrioritySelection() {
 
     const priorityBtns = document.querySelectorAll(".priority-btn");
     const customInput = document.getElementById("custom-priority");
+    const customColor = document.getElementById("priority-color");
 
     customInput.addEventListener("change", (event) => {
 
@@ -297,15 +303,26 @@ function initializePrioritySelection() {
 
     });
 
+    customColor.addEventListener("change", (event) => {
+
+        selectedPriorityColor = event.target.value;
+        console.log("The task has " + selectedPriorityColor + " background color");
+
+    });
+
     priorityBtns.forEach(button => {
 
         button.addEventListener("click", () => {
             
             if (button.classList.contains("selected")){
+
                 button.classList.remove("selected");
                 selectedPriority = null;
                 customInput.style.display = "none";
+                customColor.style.display = "none";
                 customInput.value = "";
+                customColor.value = "#000000";
+
             } else {
 
                 priorityBtns.forEach(btn => {
@@ -316,15 +333,17 @@ function initializePrioritySelection() {
 
                 if (!button.classList.contains("custom-priority")){
                     customInput.style.display = "none";
+                    customColor.style.display = "none";
                     customInput.value = "";
+                    customColor.value = "#000000";
                     selectedPriority = button.textContent;
                 } else {
                     customInput.style.display = "block";
+                    customColor.style.display = "block";
                     customInput.focus();
                     selectedPriority = customInput.value || "";
+                    selectedPriorityColor = customColor.value || "";
                 }
-
-                console.log("The task is : ", selectedPriority, " important");
             }
         });
     })
@@ -364,6 +383,7 @@ function saveTask() {
         id: "task-" + Date.now(),
         taskName: taskName,
         priority: selectedPriority,
+        priorityColor: selectedPriorityColor,
         duration: selectedDuration,
         isComplete: false,
         createdAt: new Date().toISOString()
@@ -395,8 +415,13 @@ function saveTask() {
     customPriority.value = "";
     customPriority.style.display = "none";
 
+    const customColor = document.getElementById("priority-color");
+    customColor.value = "#000000";
+    customColor.style.display = "none";
+
     selectedDuration = null;
     selectedPriority = null;
+    selectedPriorityColor = null;
 
     document.querySelectorAll(".selection-btn").forEach(selection => {
         selection.classList.remove("selected");
@@ -569,6 +594,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         const customPriority = document.getElementById("custom-priority");
         customPriority.value = "";
         customPriority.style.display = "none";
+
+        const customColor = document.getElementById("priority-color");
+        customColor.value = "#000000";
+        customColor.style.display = "none";
 
         modal.close();
     });
