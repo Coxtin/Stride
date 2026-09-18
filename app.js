@@ -5,6 +5,7 @@ let selectedPriorityColor = null;
 let timeForSync = null;
 let currentFocusInterval = null;
 let currentFocusTaskId = null;
+let currentEditTaskId = null;
 
 function showHeader () {
 
@@ -221,6 +222,7 @@ function showTasks(tasks) {
                             ? `<button class="start-timer-btn" id="start-timer-btn">Start ${element.duration} minute timer</button>`
                             : ``
                         }
+                        <button class="edit-btn">Edit task</button>
                         <button class="delete-btn">Remove</button>
                     </div>
                 </div>
@@ -379,55 +381,86 @@ function saveTask() {
         return;
     }
 
-    const newTask = {
-        id: "task-" + Date.now(),
-        taskName: taskName,
-        priority: selectedPriority,
-        priorityColor: selectedPriorityColor,
-        duration: selectedDuration,
-        isComplete: false,
-        createdAt: new Date().toISOString()
+    let tasksArray = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    if (currentEditTaskId !== null){
+
+        tasksArray = tasksArray.map(task => {
+            if (task.id === currentEditTaskId){
+                return {
+                    ...task,
+                    taskName: taskName,
+                    priority: selectedPriority,
+                    priorityColor: selectedPriorityColor,
+                    duration: selectedDuration
+                }
+            }
+            return task;
+        });
+
+        currentEditTaskId = null;
+        document.querySelector("#modal h2").textContent = "Enter a new task";
+
+    } else {
+
+        const newTask = {
+            id: "task-" + Date.now(),
+            taskName: taskName,
+            priority: selectedPriority,
+            priorityColor: selectedPriorityColor,
+            duration: selectedDuration,
+            isComplete: false,
+            createdAt: new Date().toISOString()
+        }
+        tasksArray.push(newTask);
+
+        console.log("The new task: ", newTask);
     }
 
-    console.log("The new task: ", newTask);
-
-    const savedTasks = localStorage.getItem("tasks");
-    let tasksArray = [];
-
-    if (savedTasks !== null)
-        tasksArray = JSON.parse(savedTasks);
-
-    tasksArray.push(newTask);
-
     localStorage.setItem("tasks", JSON.stringify(tasksArray));
-
     showHeader();
     showTasks(tasksArray);
     scheduleCloudSync(tasksArray);
-
     taskNameInput.value = "";
-
     const customTime = document.getElementById("custom-time");
     customTime.value = "";
     customTime.style.display = "none";
-
     const customPriority = document.getElementById("custom-priority");
     customPriority.value = "";
     customPriority.style.display = "none";
-
     const customColor = document.getElementById("priority-color");
     customColor.value = "#000000";
     customColor.style.display = "none";
-
     selectedDuration = null;
     selectedPriority = null;
     selectedPriorityColor = null;
-
     document.querySelectorAll(".selection-btn").forEach(selection => {
         selection.classList.remove("selected");
     })
-
     document.getElementById("modal").close();
+}
+
+function editTask(taskId){
+
+    const tasksArray = JSON.parse(localStorage.getItem("tasks"));
+
+    const taskToEdit = tasksArray.find(task => task.id === taskId);
+
+    if (!taskToEdit){
+        alert("There is no task to edit!");
+        return;
+    }
+
+    currentEditTaskId = taskId;
+
+    document.querySelector("#modal h2").textContent = "Edit task";
+    document.getElementById("task-name").value = taskToEdit.taskName;
+    selectedDuration = taskToEdit.duration || null;
+    selectedPriority = taskToEdit.priority || null;
+    selectedPriorityColor = taskToEdit.priorityClass || null;
+
+    document.getElementById("modal").showModal();
+
 }
 
 function checkTask(id){
@@ -572,12 +605,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         const taskId = selectedTask.id;
         console.log("Tasks's id: ", taskId);
         const deleteButton = event.target.closest(".delete-btn");
+        const editButton = event.target.closest(".edit-btn");
         const openFocusModal = event.target.closest(".start-timer-btn");
 
         if (deleteButton)
             removeTask(taskId);
         else if (openFocusModal)
            startFocusMode(taskId);
+        else if(editButton)
+            editTask(taskId);
         else
             checkTask(taskId);
     });

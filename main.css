@@ -120,6 +120,10 @@ body, html {
     font-size: 1.125rem;
     font-weight: 600;
     margin: 0;
+    width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .task-meta {
@@ -178,6 +182,22 @@ body, html {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+}
+
+.edit-btn {
+    background-color: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--text-muted);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.edit-btn:hover{
+    background-color: var(--text-muted);
+    color: white;
 }
 
 .delete-btn:hover {
@@ -318,19 +338,16 @@ input[type="password"]:focus {
     line-height: 1.4;
 }
 
-/* Clasa care ascunde indicatorul cand nu e nevoie de el */
 .sync-status.hidden {
     opacity: 0;
     pointer-events: none;
 }
 
-/* Culorile pentru fiecare stare */
 .sync-status.saving { background-color: #f39c12; } /* Portocaliu */
 .sync-status.success { background-color: #27ae60; } /* Verde */
 .sync-status.offline { background-color: #7f8c8d; } /* Gri */
 .sync-status.error { background-color: #e74c3c; } /* Rosu */
 
-/* Focus Modal Styling */
 .focus-modal {
     border: none;
     border-radius: 16px;
@@ -407,7 +424,6 @@ input[type="password"]:focus {
     border-color: var(--primary-hover);
 }
 
-/* Responsive Design for Mobile Devices */
 @media screen and (max-width: 600px) {
     .container {
         padding: 20px 10px;
