@@ -222,7 +222,11 @@ function showTasks(tasks) {
                             ? `<button class="start-timer-btn" id="start-timer-btn">Start ${element.duration} minute timer</button>`
                             : ``
                         }
-                        <button class="edit-btn">Edit task</button>
+                        ${!element.isComplete
+                            ? `<button class="edit-btn">Edit task</button>`
+                            : ''
+                        }
+
                         <button class="delete-btn">Remove</button>
                     </div>
                 </div>
