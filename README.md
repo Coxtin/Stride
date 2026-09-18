@@ -29,4 +29,4 @@ Since the app uses your own GitHub data, a quick initial setup is required:
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/your-username/repo-name.git](https://github.com/your-username/repo-name.git)
+   git clone [https://github.com/Coxtin/Stride.git](https://github.com/Coxtin/Stride.git)
