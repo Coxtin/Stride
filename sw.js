@@ -23,6 +23,8 @@ self.addEventListener('install', (event) => {
 
 // FAZA 2: Când deschizi aplicația, interceptează orice cerere către aceste fișiere
 self.addEventListener('fetch', (event) => {
+  if (event.request.url.includes("api.github.com"))
+    return;
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
