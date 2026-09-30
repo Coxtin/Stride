@@ -1,3 +1,6 @@
+import { TOKEN } from "./token.js";
+
+const CLOUD_SYNC_DELAY_MS = 2000;
 const GITHUB_GIST_URL = `https://api.github.com/gists`;
 const GITHUB_GIST_NAME = `tasks.json`;
 let timeForSync = null;
@@ -5,8 +8,8 @@ let currentResolve = null;
 
 function getAPIConfig() {
 
-    const token = localStorage.getItem("github_token");
-    const gistId = localStorage.getItem("gist_id");
+    const token = TOKEN.github_token;
+    const gistId = TOKEN.gist_id;
 
     if (!token || !gistId){
         return null;
@@ -112,7 +115,7 @@ export function scheduleCloudSync(tasksArray) {
             timeForSync = null;
             const response = await cloudSync(tasksArray);
             currentResolve(response);
-        }, 2000);
+        }, CLOUD_SYNC_DELAY_MS);
     });
 }
 
