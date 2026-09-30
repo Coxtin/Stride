@@ -1,6 +1,9 @@
 import { resetTaskFormUI } from "./ui.js";
 import { toggleModal } from "./ui.js";
 
+const SECONDS_IN_MINUTE = 60;
+const FOCUS_TIMER_TICK_MS = 1000;
+
 let tasksArray = JSON.parse(localStorage.getItem("tasks")) || [];
 
 let selectedPriority = null;
@@ -156,7 +159,7 @@ export function startFocusMode(taskId, onStart, onTick, onFinish) {
     }
 
     currentFocusTaskId = taskId;
-    let remainingTime = Number(task.duration) * 60;
+    let remainingTime = Number(task.duration) * SECONDS_IN_MINUTE;
 
     if (onStart) onStart(task.taskName, remainingTime);
 
@@ -171,7 +174,7 @@ export function startFocusMode(taskId, onStart, onTick, onFinish) {
             clearInterval(currentFocusInterval);
             if (onFinish) onFinish();
         }
-    }, 1000);
+    }, FOCUS_TIMER_TICK_MS);
 
     return true;
 }

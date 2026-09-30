@@ -1,13 +1,16 @@
 import { loadTasksFromGist, cloudSync, scheduleCloudSync, forceSync, isOnline } from "./api.js";
 import { showTasks, showSyncStatus, toggleModal, initializeDurationSelection, initializePrioritySelection, updateHeaderUI, resetTaskFormUI, updateFocusTimer, playSound } from "./ui.js";
 import * as task from "./tasks.js";
+import { TOKEN } from "./token.js";
+
+const LOADING_FADE_OUT_MS = 500;
 
 function showHeader () {
     const tasksArray = JSON.parse(localStorage.getItem("tasks")) || [];
     const activeTasksCount = tasksArray.filter(task => !task.isComplete).length;
     
-    const token = localStorage.getItem("github_token");
-    const gistId = localStorage.getItem("gist_id");
+    const token = TOKEN.github_token;
+    const gistId = TOKEN.gist_id;
     const isCloudConfigured = Boolean(token && gistId);
 
     updateHeaderUI(activeTasksCount, isCloudConfigured);
@@ -33,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadingOverlay.style.transition = "opacity 0.5s ease";
     setTimeout(() => {
         loadingOverlay.style.display = "none"
-    }, 500);
+    }, LOADING_FADE_OUT_MS);
 
     showHeader();
     initializeDurationSelection();
@@ -57,8 +60,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const editButton = event.target.closest(".edit-btn");
         const openFocusModal = event.target.closest(".start-timer-btn");
 
-        const token = localStorage.getItem("github_token");
-        const gistId = localStorage.getItem("gist_id");
+        const token = TOKEN.github_token;
+        const gistId = TOKEN.gist_id;
         const isCloudConfigured = Boolean(token && gistId);
 
         if (deleteButton){
@@ -160,8 +163,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         showTasks(updatedTasks);
         showHeader();
 
-        const token = localStorage.getItem("github_token");
-        const gistId = localStorage.getItem("gist_id");
+        const token = TOKEN.github_token;
+        const gistId = TOKEN.gist_id;
         if (token && gistId) {
             showSyncStatus("Saving to cloud...", "saving");
             const syncResult = await scheduleCloudSync(updatedTasks);
@@ -176,8 +179,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("open-settings-modal").addEventListener("click", () => {
 
-        githubPAT.value = localStorage.getItem("github_token") || "";
-        githubGistId.value = localStorage.getItem("gist_id") || "";
+        githubPAT.value = TOKEN.github_token || "";
+        githubGistId.value = TOKEN.gist_id || "";
         toggleModal("settings-modal", true);
 
     });
@@ -231,8 +234,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         showHeader();
         showTasks(updatedTasks);
 
-        const token = localStorage.getItem("github_token");
-        const gistId = localStorage.getItem("gist_id");
+        const token = TOKEN.github_token;
+        const gistId = TOKEN.gist_id;
         if (token && gistId) {
             showSyncStatus("Updating...", "saving");
             if (await scheduleCloudSync(updatedTasks)){

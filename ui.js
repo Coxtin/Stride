@@ -1,3 +1,8 @@
+const STATUS_MESSAGE_TIMEOUT_MS = 3000;
+const BEEP_WAVE_TYPE = "square";
+const BEEP_FREQUENCY_HZ = 440;
+const BEEP_DURATION_SEC = 0.5;
+
 export function showTasks(tasks) {
 
     const container = document.getElementById("task-list");
@@ -72,7 +77,7 @@ export function showSyncStatus(message, status){
     if (status !== 'offline')
         setTimeout(() => {
             statusMessage.classList.add("hidden");
-    }, 3000);
+    }, STATUS_MESSAGE_TIMEOUT_MS);
 }
 
 export function resetFormContent(formId){
@@ -86,7 +91,7 @@ export function initializeDurationSelection() {
     customInput.addEventListener("change", (event) => {
         const time = Number(event.target.value);
         if (event.target.value !== "" && time <= 0){
-            alert("You can not set the duration of a task less than 1!");
+            alert("You can not set the duration of a task less than 1 minute!");
             event.target.value = "";
         }
     }); 
@@ -199,9 +204,9 @@ export function updateFocusTimer(timerElement, remainingTime){
 export function playSound(){
     const audioCtx = new window.AudioContext;
     const oscillator = audioCtx.createOscillator();
-    oscillator.type = "square";
-    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+    oscillator.type = BEEP_WAVE_TYPE;
+    oscillator.frequency.setValueAtTime(BEEP_FREQUENCY_HZ, audioCtx.currentTime);
     oscillator.connect(audioCtx.destination);
     oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 0.5);
+    oscillator.stop(audioCtx.currentTime + BEEP_DURATION_SEC);
 }
