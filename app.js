@@ -43,8 +43,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     initializePrioritySelection();
 
     const taskListContainer = document.getElementById("task-list");
+
     const githubPAT = document.getElementById("github-PAT");
     const githubGistId = document.getElementById("github-gist-id");
+    const githubGistName = document.getElementById("github-gist-name");
     
     taskListContainer.addEventListener("click", async (event) => {
         console.log("The card was pressed!");
@@ -62,7 +64,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const token = TOKEN.github_token;
         const gistId = TOKEN.gist_id;
-        const isCloudConfigured = Boolean(token && gistId);
+        const gistName = TOKEN.gist_name;
+        const isCloudConfigured = Boolean(token && gistId && gistName);
 
         if (deleteButton){
             updatedTasks = task.removeTask(taskId);
@@ -195,10 +198,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const newToken = githubPAT.value.trim();
         const newGist = githubGistId.value.trim();
+        const newGistName = githubGistName.value.trim();
 
-        if (newToken && newGist){
+        if (newToken && newGist && newGistName){
             localStorage.setItem("github_token", newToken);
             localStorage.setItem("gist_id", newGist);
+            localStorage.setItem("gist_name", newGistName);
 
             console.log("New cloud settings established! Syncing data...");
            

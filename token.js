@@ -4,5 +4,8 @@ export const TOKEN = {
     },
     get gist_id() {
         return localStorage.getItem("gist_id") || null;
+    },
+    get gist_name(){
+        return localStorage.getItem("gist_name") || null;
     }
 }

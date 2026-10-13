@@ -2,7 +2,6 @@ import { TOKEN } from "./token.js";
 
 const CLOUD_SYNC_DELAY_MS = 2000;
 const GITHUB_GIST_URL = `https://api.github.com/gists`;
-const GITHUB_GIST_NAME = `tasks.json`;
 let timeForSync = null;
 let currentResolve = null;
 
@@ -10,8 +9,9 @@ function getAPIConfig() {
 
     const token = TOKEN.github_token;
     const gistId = TOKEN.gist_id;
+    const gistName = TOKEN.gist_name;
 
-    if (!token || !gistId){
+    if (!token || !gistId || !gistName){
         return null;
     }
 
@@ -20,7 +20,8 @@ function getAPIConfig() {
         headers: {
             "Authorization" : `Bearer ${token}`,
             "Accept" : "application/vnd.github.v3+json"
-        }
+        },
+        gistName : `${gistName}`
     };
 }
 
@@ -48,7 +49,7 @@ export async function loadTasksFromGist() {
         }
 
         const data = await response.json();
-        const content = data.files[GITHUB_GIST_NAME].content;
+        const content = data.files[config.gistName].content;
         const tasksContent = JSON.parse(content || "[]");
 
         localStorage.setItem("tasks", JSON.stringify(tasksContent));
@@ -75,7 +76,7 @@ export async function cloudSync(tasksArray) {
 
         const requestBody = {
             files: {
-                [GITHUB_GIST_NAME] : {
+                [config.gistName] : {
                     content: JSON.stringify(tasksArray)
                 }
             }
